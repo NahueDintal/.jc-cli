@@ -17,13 +17,12 @@ public class RunCommand {
         return;
       }
 
-      // Verificar si necesita recompilar
       if (needsRecompile()) {
         if (!compileProject()) {
           return;
         }
       } else {
-        System.out.println("Usando clases compiladas existentes");
+        // System.out.println("Usando clases compiladas existentes");
       }
 
       runProject();
@@ -87,7 +86,7 @@ public class RunCommand {
 
       int exitCode = process.waitFor();
       if (exitCode == 0) {
-        System.out.println("Compilación exitosa");
+        // System.out.println("Compilación exitosa");
         return true;
       } else {
         System.err.println("Error en compilación");
