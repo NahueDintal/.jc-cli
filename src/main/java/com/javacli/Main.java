@@ -19,9 +19,11 @@ public class Main {
         RunCommand.execute();
         break;
       case "--version":
+      case "-v":
         System.out.println("Java Commander (jc) v1.0 - Java 25");
         break;
       case "--help":
+      case "-h":
         printUsage();
         break;
       default:
@@ -35,7 +37,7 @@ public class Main {
     System.out.println("Comandos:");
     System.out.println("  new        - Crear nuevo proyecto Java");
     System.out.println("  run        - Compilar y ejecutar proyecto actual");
-    System.out.println("  --version  - Mostrar versión");
-    System.out.println("  --help     - Mostrar ayuda");
+    System.out.println("  --version, -v - Mostrar versión");
+    System.out.println("  --help, -h     - Mostrar ayuda");
   }
 }

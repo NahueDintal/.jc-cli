@@ -10,10 +10,10 @@ public class RunCommand {
   public static void execute() {
     try {
       String projectName = getProjectName();
-      System.out.println("🏗️  Building and running " + projectName + "...");
+      System.out.println("Construyendo y corriendo " + projectName + "...");
 
       if (!Files.exists(Paths.get("src"))) {
-        System.err.println("❌ No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
+        System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
         return;
       }
 
@@ -23,13 +23,13 @@ public class RunCommand {
           return;
         }
       } else {
-        System.out.println("✅ Usando clases compiladas existentes");
+        System.out.println("Usando clases compiladas existentes");
       }
 
       runProject();
 
     } catch (Exception e) {
-      System.err.println("❌ Error: " + e.getMessage());
+      System.err.println("Error: " + e.getMessage());
       e.printStackTrace();
     }
   }
@@ -64,11 +64,10 @@ public class RunCommand {
           .toList();
 
       if (javaFiles.isEmpty()) {
-        System.err.println("❌ No se encontraron archivos .java en 'src/'");
+        System.err.println("No se encontraron archivos .java en 'src/'");
         return false;
       }
 
-      System.out.println("🔨 Compilando con Java 25...");
       Files.createDirectories(Paths.get("bin"));
 
       List<String> compileCommand = new ArrayList<>();
@@ -88,28 +87,27 @@ public class RunCommand {
 
       int exitCode = process.waitFor();
       if (exitCode == 0) {
-        System.out.println("✅ Compilación exitosa");
+        System.out.println("Compilación exitosa");
         return true;
       } else {
-        System.err.println("❌ Error en compilación");
+        System.err.println("Error en compilación");
         return false;
       }
 
     } catch (Exception e) {
-      System.err.println("❌ Error durante compilación: " + e.getMessage());
+      System.err.println("Error durante compilación: " + e.getMessage());
       return false;
     }
   }
 
   private static void runProject() {
     try {
-      System.out.println("🚀 Ejecutando...");
       ProcessBuilder pb = new ProcessBuilder("java", "-cp", "bin", "Main");
       pb.inheritIO();
       Process process = pb.start();
       process.waitFor();
     } catch (Exception e) {
-      System.err.println("❌ Error durante ejecución: " + e.getMessage());
+      System.err.println("Error durante ejecución: " + e.getMessage());
     }
   }
 }
