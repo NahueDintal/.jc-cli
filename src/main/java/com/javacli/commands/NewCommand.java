@@ -33,7 +33,7 @@ public class NewCommand {
     String mainJavaContent = """
         public class Main {
             public static void main(String[] args) {
-                System.out.println("¡Hola Wachin! ¡Desde %s con Java 25!");
+                System.out.println("¡Hola Wachin! ¡Desde el directorio '%s' con Java 25!");
             }
         }
         """.formatted(projectName, projectName);

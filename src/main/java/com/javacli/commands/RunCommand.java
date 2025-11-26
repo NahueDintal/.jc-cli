@@ -10,7 +10,6 @@ public class RunCommand {
   public static void execute() {
     try {
       String projectName = getProjectName();
-      System.out.println("Construyendo y corriendo " + projectName + "...");
 
       if (!Files.exists(Paths.get("src"))) {
         System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
@@ -21,10 +20,7 @@ public class RunCommand {
         if (!compileProject()) {
           return;
         }
-      } else {
-        // System.out.println("Usando clases compiladas existentes");
       }
-
       runProject();
 
     } catch (Exception e) {
