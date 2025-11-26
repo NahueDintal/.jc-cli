@@ -9,32 +9,33 @@ import java.util.List;
 public class RunCommand {
   public static void execute() {
     try {
-      String projectName = getProjectName();
-
       if (!Files.exists(Paths.get("src"))) {
-        System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
+        System.err.println("❌ No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
         return;
       }
 
+      // Verificar si necesitamos recompilar (tu lógica actual)
       if (needsRecompile()) {
-        if (!compileProject()) {
+        System.out.println("🔨 Cambios detectados, recompilando...");
+        if (!BuildCommand.compileProject()) {
           return;
         }
+      } else {
+        System.out.println("Usando compilación existente...");
       }
+
+      System.out.println("Ejecutando proyecto...");
       runProject();
 
     } catch (Exception e) {
-      System.err.println("Error: " + e.getMessage());
-      e.printStackTrace();
+      System.err.println("Error durante ejecución: " + e.getMessage());
     }
   }
 
-  private static String getProjectName() {
-    Path currentPath = Paths.get("").toAbsolutePath();
-    return currentPath.getFileName().toString();
-  }
-
+  // Mover el método compileProject a BuildCommand
+  // Y mantener solo needsRecompile y runProject aquí
   private static boolean needsRecompile() throws IOException {
+    // Tu lógica actual de detección de cambios
     File binDir = new File("bin");
     if (!binDir.exists() || !new File("bin/Main.class").exists()) {
       return true;
@@ -50,49 +51,6 @@ public class RunCommand {
             return true;
           }
         });
-  }
-
-  private static boolean compileProject() {
-    try {
-      List<Path> javaFiles = Files.walk(Paths.get("src"))
-          .filter(path -> path.toString().endsWith(".java"))
-          .toList();
-
-      if (javaFiles.isEmpty()) {
-        System.err.println("No se encontraron archivos .java en 'src/'");
-        return false;
-      }
-
-      Files.createDirectories(Paths.get("bin"));
-
-      List<String> compileCommand = new ArrayList<>();
-      compileCommand.add("javac");
-      compileCommand.add("--release");
-      compileCommand.add("25");
-      compileCommand.add("-d");
-      compileCommand.add("bin");
-
-      for (Path javaFile : javaFiles) {
-        compileCommand.add(javaFile.toString());
-      }
-
-      ProcessBuilder pb = new ProcessBuilder(compileCommand);
-      pb.inheritIO();
-      Process process = pb.start();
-
-      int exitCode = process.waitFor();
-      if (exitCode == 0) {
-        // System.out.println("Compilación exitosa");
-        return true;
-      } else {
-        System.err.println("Error en compilación");
-        return false;
-      }
-
-    } catch (Exception e) {
-      System.err.println("Error durante compilación: " + e.getMessage());
-      return false;
-    }
   }
 
   private static void runProject() {
