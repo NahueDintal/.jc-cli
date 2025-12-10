@@ -25,7 +25,7 @@ public class NewCommand {
 
   private static void createProjectStructure(String projectName) throws IOException {
     Files.createDirectories(Paths.get("src/main/java"));
-    Files.createDirectories(Paths.get("src/test/java"));
+    // Files.createDirectories(Paths.get("src/test/java"));
     Files.createDirectories(Paths.get("lib"));
   }
 

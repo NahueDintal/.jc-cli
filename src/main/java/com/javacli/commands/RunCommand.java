@@ -10,13 +10,13 @@ public class RunCommand {
   public static void execute() {
     try {
       if (!Files.exists(Paths.get("src"))) {
-        System.err.println("❌ No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
+        System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
         return;
       }
 
       // Verificar si necesitamos recompilar (tu lógica actual)
       if (needsRecompile()) {
-        System.out.println("🔨 Cambios detectados, recompilando...");
+        System.out.println("Cambios detectados, recompilando...");
         if (!BuildCommand.compileProject()) {
           return;
         }
@@ -32,10 +32,7 @@ public class RunCommand {
     }
   }
 
-  // Mover el método compileProject a BuildCommand
-  // Y mantener solo needsRecompile y runProject aquí
   private static boolean needsRecompile() throws IOException {
-    // Tu lógica actual de detección de cambios
     File binDir = new File("bin");
     if (!binDir.exists() || !new File("bin/Main.class").exists()) {
       return true;
