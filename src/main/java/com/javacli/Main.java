@@ -10,6 +10,7 @@ public class Main {
     }
 
     String command = args[0];
+
     switch (command) {
       case "new":
         if (args.length > 1 && args[1].equals("jar")) {
@@ -18,33 +19,47 @@ public class Main {
           NewCommand.execute();
         }
         break;
+
       case "run":
         if (args.length > 1 && args[1].equals("jar")) {
           RunJarCommand.execute();
         } else {
-          NewCommand.execute();
+          RunCommand.execute();
         }
-        RunCommand.execute();
         break;
+
+      case "build":
+        if (args.length > 1 && args[1].equals("test")) {
+          if (BuildCommand.compileTestProject()) {
+            System.out.println("✅ Tests compilados exitosamente");
+          } else {
+            System.err.println("❌ Falló la compilación de tests");
+          }
+        } else {
+          BuildCommand.execute();
+        }
+        break;
+
+      case "test":
+        TestCommand.execute();
+        break;
+
+      case "clean":
+        CleanCommand.execute();
+        break;
+
       case "--version":
       case "-v":
         System.out.println("Java Commander (jc) v1.0 - Java 25");
         break;
+
       case "--help":
       case "-h":
         printUsage();
         break;
-      case "build":
-        BuildCommand.execute();
-        break;
-      case "clean":
-        CleanCommand.execute();
-        break;
-      case "test":
-        TestCommand.execute();
-        break;
+
       default:
-        System.out.println("Comando no reconocido: " + command);
+        System.out.println("❌ Comando no reconocido: " + command);
         printUsage();
     }
   }
@@ -54,11 +69,12 @@ public class Main {
     System.out.println("Comandos:");
     System.out.println("  new               - Crear nuevo proyecto Java.");
     System.out.println("  new jar           - Empaquetar proyecto en JAR ejecutable.");
-    System.out.println("  build             - Construye el proyecto Java.");
-    System.out.println("  run               - Compilar y ejecutar proyecto actual.");
-    System.out.println("  run jar           - Ejecutar el JAR generado (desde dist/).");
-    System.out.println("  clean             - Limpia los archivos temporales.");
+    System.out.println("  build             - Compilar código en src/main/java.");
+    System.out.println("  build test        - Compilar tests en src/test/java.");
+    System.out.println("  run               - Compilar y ejecutar proyecto.");
+    System.out.println("  run jar           - Ejecutar JAR generado.");
     System.out.println("  test              - Compilar y ejecutar tests.");
+    System.out.println("  clean             - Limpiar archivos compilados.");
     System.out.println("  --version, -v     - Mostrar versión.");
     System.out.println("  --help, -h        - Mostrar ayuda.");
   }

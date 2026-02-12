@@ -8,14 +8,12 @@ public class TestCommand {
 
   public static void execute() {
     try {
-      // 1. Compilar tests
       System.out.println("🔨 Compilando tests...");
       if (!BuildCommand.compileTestProject()) {
         System.err.println("❌ Falló la compilación de tests");
         return;
       }
 
-      // 2. Ejecutar tests con JUnit Console Launcher
       System.out.println("🚀 Ejecutando tests...");
       runTests();
 
@@ -31,18 +29,17 @@ public class TestCommand {
       return;
     }
 
-    // Classpath: bin-test/ + bin/ + lib/*.jar
     String cp = "bin-test" + File.pathSeparator +
         "bin" + File.pathSeparator +
         BuildCommand.buildClasspath();
 
-    List<String> cmd = new ArrayList<>();
-    cmd.add("java");
-    cmd.add("-cp");
-    cmd.add(cp);
-    cmd.add("org.junit.platform.console.ConsoleLauncher");
-    cmd.add("--scan-classpath");
-    cmd.add("--details=tree");
+    // Usar 'execute' en lugar de --scan-classpath para evitar warning
+    List<String> cmd = List.of(
+        "java", "-cp", cp,
+        "org.junit.platform.console.ConsoleLauncher",
+        "execute",
+        "--scan-classpath",
+        "--details=tree");
 
     ProcessBuilder pb = new ProcessBuilder(cmd);
     pb.inheritIO();
@@ -61,7 +58,8 @@ public class TestCommand {
     if (!Files.exists(libDir))
       return null;
     return Files.walk(libDir)
-        .filter(p -> p.toString().contains("junit-platform-console-standalone"))
+        .filter(p -> p.toString().toLowerCase().contains("junit"))
+        .filter(p -> p.toString().endsWith(".jar"))
         .findFirst()
         .orElse(null);
   }

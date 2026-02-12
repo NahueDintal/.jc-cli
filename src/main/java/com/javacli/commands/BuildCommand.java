@@ -1,45 +1,50 @@
 package com.javacli.commands;
 
 import java.util.stream.Collectors;
-
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BuildCommand {
+
   public static void execute() {
     try {
-      if (!Files.exists(Paths.get("src"))) {
-        System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
+      if (!Files.exists(Paths.get("src/main/java"))) {
+        System.err.println("❌ No se encuentra 'src/main/java'. Ejecutá 'jc new' primero.");
         return;
       }
 
-      System.out.println("Compilando proyecto...");
+      System.out.println("🔨 Compilando proyecto...");
 
       if (compileProject()) {
-        System.out.println("Compilación exitosa! Archivos en: bin/");
+        System.out.println("✅ Compilación exitosa! Archivos en: bin/");
       } else {
-        System.err.println("Error en la compilación");
+        System.err.println("❌ Error en la compilación");
       }
 
     } catch (Exception e) {
-      System.err.println("Error durante build: " + e.getMessage());
+      System.err.println("❌ Error durante build: " + e.getMessage());
     }
   }
 
   public static boolean compileProject() {
     try {
-      List<Path> javaFiles = Files.walk(Paths.get("src"))
+      Path mainSrc = Paths.get("src/main/java");
+      if (!Files.exists(mainSrc)) {
+        System.err.println("❌ No existe src/main/java");
+        return false;
+      }
+
+      List<Path> javaFiles = Files.walk(mainSrc)
           .filter(path -> path.toString().endsWith(".java"))
           .toList();
 
       if (javaFiles.isEmpty()) {
-        System.err.println("No se encontraron archivos .java en 'src/'");
+        System.err.println("❌ No se encontraron archivos .java en src/main/java");
         return false;
       }
 
-      // Crear directorio bin si no existe
       Files.createDirectories(Paths.get("bin"));
 
       List<String> compileCommand = new ArrayList<>();
@@ -49,31 +54,35 @@ public class BuildCommand {
       compileCommand.add("-d");
       compileCommand.add("bin");
 
-      // Agregar todos los archivos .java
+      // Agregar classpath de lib/ si existe
+      String cp = buildClasspath();
+      if (!cp.isEmpty()) {
+        compileCommand.add("-cp");
+        compileCommand.add(cp);
+      }
+
+      // Agregar archivos .java
       for (Path javaFile : javaFiles) {
         compileCommand.add(javaFile.toString());
       }
 
-      // Ejecutar compilación
       ProcessBuilder pb = new ProcessBuilder(compileCommand);
       pb.inheritIO();
       Process process = pb.start();
-
       int exitCode = process.waitFor();
       return exitCode == 0;
 
     } catch (Exception e) {
-      System.err.println("Error durante compilación: " + e.getMessage());
+      System.err.println("❌ Error durante compilación: " + e.getMessage());
       return false;
     }
   }
 
   public static boolean compileTestProject() {
     try {
-      // Buscar archivos .java en src/test/java
       Path testSrc = Paths.get("src/test/java");
       if (!Files.exists(testSrc)) {
-        System.err.println("No existe el directorio src/test/java");
+        System.err.println("❌ No existe src/test/java");
         return false;
       }
 
@@ -82,15 +91,17 @@ public class BuildCommand {
           .toList();
 
       if (testFiles.isEmpty()) {
-        System.err.println("No hay archivos de test");
+        System.err.println("❌ No hay archivos de test en src/test/java");
         return false;
       }
 
-      // Crear directorio bin-test
       Files.createDirectories(Paths.get("bin-test"));
 
-      // Classpath: bin/ (producción) + todos los JARs de lib/
       String cp = "bin" + File.pathSeparator + buildClasspath();
+      if (cp.trim().isEmpty()) {
+        System.err.println("❌ Classpath vacío. ¿Hay JARs en lib/?");
+        return false;
+      }
 
       List<String> compileCommand = new ArrayList<>();
       compileCommand.add("javac");
@@ -108,7 +119,7 @@ public class BuildCommand {
       return process.waitFor() == 0;
 
     } catch (Exception e) {
-      System.err.println("Error compilando tests: " + e.getMessage());
+      System.err.println("❌ Error compilando tests: " + e.getMessage());
       return false;
     }
   }
