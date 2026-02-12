@@ -40,6 +40,9 @@ public class Main {
       case "clean":
         CleanCommand.execute();
         break;
+      case "test":
+        TestCommand.execute();
+        break;
       default:
         System.out.println("Comando no reconocido: " + command);
         printUsage();
@@ -55,6 +58,7 @@ public class Main {
     System.out.println("  run               - Compilar y ejecutar proyecto actual.");
     System.out.println("  run jar           - Ejecutar el JAR generado (desde dist/).");
     System.out.println("  clean             - Limpia los archivos temporales.");
+    System.out.println("  test              - Compilar y ejecutar tests.");
     System.out.println("  --version, -v     - Mostrar versión.");
     System.out.println("  --help, -h        - Mostrar ayuda.");
   }
