@@ -1,9 +1,6 @@
 package com.javacli;
 
-import com.javacli.commands.NewCommand;
-import com.javacli.commands.RunCommand;
-import com.javacli.commands.BuildCommand;
-import com.javacli.commands.CleanCommand;
+import com.javacli.commands.*;
 
 public class Main {
   public static void main(String[] args) {
@@ -15,9 +12,18 @@ public class Main {
     String command = args[0];
     switch (command) {
       case "new":
-        NewCommand.execute();
+        if (args.length > 1 && args[1].equals("jar")) {
+          NewJarCommand.execute();
+        } else {
+          NewCommand.execute();
+        }
         break;
       case "run":
+        if (args.length > 1 && args[1].equals("jar")) {
+          RunJarCommand.execute();
+        } else {
+          NewCommand.execute();
+        }
         RunCommand.execute();
         break;
       case "--version":
@@ -44,8 +50,10 @@ public class Main {
     System.out.println("Uso: jc <comando>");
     System.out.println("Comandos:");
     System.out.println("  new               - Crear nuevo proyecto Java.");
+    System.out.println("  new jar           - Empaquetar proyecto en JAR ejecutable.");
     System.out.println("  build             - Construye el proyecto Java.");
     System.out.println("  run               - Compilar y ejecutar proyecto actual.");
+    System.out.println("  run jar           - Ejecutar el JAR generado (desde dist/).");
     System.out.println("  clean             - Limpia los archivos temporales.");
     System.out.println("  --version, -v     - Mostrar versión.");
     System.out.println("  --help, -h        - Mostrar ayuda.");
