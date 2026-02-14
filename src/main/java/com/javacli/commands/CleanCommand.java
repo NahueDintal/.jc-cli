@@ -11,14 +11,12 @@ public class CleanCommand {
 
       boolean deletedSomething = false;
 
-      // Limpiar directorio bin
       if (Files.exists(Paths.get("bin"))) {
         deleteDirectoryRecursively(Paths.get("bin"));
         System.out.println("Directorio 'bin/' eliminado");
         deletedSomething = true;
       }
 
-      // También podríamos limpiar otros directorios en el futuro
       if (!deletedSomething) {
         System.out.println("No hay nada que limpiar");
       } else {
@@ -32,9 +30,8 @@ public class CleanCommand {
 
   private static void deleteDirectoryRecursively(Path path) throws IOException {
     if (Files.isDirectory(path)) {
-      // Usar Files.walk para eliminar recursivamente
       Files.walk(path)
-          .sorted((a, b) -> -a.compareTo(b)) // eliminar hijos primero
+          .sorted((a, b) -> -a.compareTo(b))
           .forEach(p -> {
             try {
               Files.delete(p);

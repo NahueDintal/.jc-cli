@@ -18,10 +18,10 @@ public class NewCommand {
       String projectName = baseDir.getFileName().toString();
       createProjectStructure(baseDir);
       createMainJavaFile(baseDir, projectName);
-      System.out.println("✅ Proyecto Java 25 creado exitosamente en: " + baseDir);
+      System.out.println("Proyecto Java 25 creado exitosamente en: " + baseDir);
       System.out.println("   Usa: 'jc run' para compilar y ejecutar");
     } catch (Exception e) {
-      System.err.println("❌ Error al crear proyecto: " + e.getMessage());
+      System.err.println("Error al crear proyecto: " + e.getMessage());
     }
   }
 
