@@ -1,5 +1,6 @@
 package com.javacli.commands;
 
+import com.javacli.config.ProjectConfig;
 import java.util.stream.Collectors;
 import java.io.*;
 import java.nio.file.*;
@@ -27,18 +28,19 @@ public class BuildCommand {
 
   public static boolean compileProject() {
     try {
-      Path mainSrc = Paths.get("src/main/java");
-      if (!Files.exists(mainSrc)) {
-        System.err.println("No existe src/main/java");
-        return false;
+      ProjectConfig config = ProjectConfig.load(Paths.get(""));
+      List<Path> javaFiles = new ArrayList<>();
+      for (String srcDir : config.getSourceDirectories()) {
+        Path srcPath = Paths.get(srcDir);
+        if (Files.exists(srcPath)) {
+          Files.walk(srcPath)
+              .filter(p -> p.toString().endsWith(".java"))
+              .forEach(javaFiles::add);
+        }
       }
-
-      List<Path> javaFiles = Files.walk(mainSrc)
-          .filter(path -> path.toString().endsWith(".java"))
-          .toList();
-
+      System.out.println("Archivos Java encontrados: " + javaFiles.size());
       if (javaFiles.isEmpty()) {
-        System.err.println("No se encontraron archivos .java en src/main/java");
+        System.err.println("No se encontraron archivos .java en " + config.getSourceDirectories());
         return false;
       }
 
@@ -51,7 +53,8 @@ public class BuildCommand {
       compileCommand.add("-d");
       compileCommand.add("bin");
 
-      String cp = buildClasspath();
+      // Usar el buildClasspath que recibe config (deberías tenerlo público)
+      String cp = BuildCommand.buildClasspath(config); // Asegúrate de que este método existe y es público
       if (!cp.isEmpty()) {
         compileCommand.add("-cp");
         compileCommand.add(cp);
@@ -61,16 +64,36 @@ public class BuildCommand {
         compileCommand.add(javaFile.toString());
       }
 
+      System.out.println("Ejecutando: " + String.join(" ", compileCommand));
       ProcessBuilder pb = new ProcessBuilder(compileCommand);
       pb.inheritIO();
       Process process = pb.start();
       int exitCode = process.waitFor();
+      System.out.println("Código de salida de javac: " + exitCode);
       return exitCode == 0;
 
     } catch (Exception e) {
       System.err.println("Error durante compilación: " + e.getMessage());
       return false;
     }
+  }
+
+  public static String buildClasspath(ProjectConfig config) {
+    List<String> cpEntries = new ArrayList<>();
+    // Añadir el directorio de salida si existe (para clases compiladas)
+    if (Files.exists(Paths.get("bin"))) {
+      cpEntries.add("bin");
+    }
+    // Añadir dependencias (rutas de JARs)
+    for (String dep : config.getDependencies()) {
+      Path depPath = Paths.get(dep);
+      if (Files.exists(depPath)) {
+        cpEntries.add(depPath.toString());
+      } else {
+        System.err.println("Advertencia: dependencia no encontrada: " + dep);
+      }
+    }
+    return String.join(File.pathSeparator, cpEntries);
   }
 
   public static boolean compileTestProject() {

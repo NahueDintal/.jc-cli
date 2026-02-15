@@ -1,6 +1,7 @@
 package com.javacli;
 
 import com.javacli.commands.*;
+import com.javacli.commands.TestCommand;
 
 public class Main {
   public static void main(String[] args) {

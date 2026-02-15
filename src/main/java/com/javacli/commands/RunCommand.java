@@ -1,5 +1,6 @@
 package com.javacli.commands;
 
+import com.javacli.config.ProjectConfig;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
@@ -49,10 +50,13 @@ public class RunCommand {
           }
         });
   }
+  // Dentro de RunCommand.java
 
   private static void runProject() {
     try {
-      ProcessBuilder pb = new ProcessBuilder("java", "-cp", "bin", "Main");
+      ProjectConfig config = ProjectConfig.load(Paths.get(""));
+      String mainClass = config.getMainClass();
+      ProcessBuilder pb = new ProcessBuilder("java", "-cp", "bin", mainClass);
       pb.inheritIO();
       Process process = pb.start();
       process.waitFor();
