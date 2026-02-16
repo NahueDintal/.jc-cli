@@ -10,17 +10,15 @@ public class TestCommand {
   public static void execute() {
     try {
       ProjectConfig config = ProjectConfig.load(Paths.get(""));
-      System.out.println("🔨 Compilando tests...");
       if (!compileTests(config)) {
-        System.err.println("❌ Falló la compilación de tests");
+        System.err.println("Falló la compilación de tests");
         return;
       }
 
-      System.out.println("🚀 Ejecutando tests...");
       runTests(config);
 
     } catch (Exception e) {
-      System.err.println("❌ Error ejecutando tests: " + e.getMessage());
+      System.err.println("Error ejecutando tests: " + e.getMessage());
     }
   }
 
@@ -41,7 +39,7 @@ public class TestCommand {
 
     Files.createDirectories(Paths.get("bin-test"));
 
-    String cp = BuildCommand.buildClasspath(config); // Usamos el método estático de BuildCommand
+    String cp = BuildCommand.buildClasspath(config);
     cp = "bin" + File.pathSeparator + cp;
 
     List<String> compileCommand = new ArrayList<>();
@@ -87,12 +85,6 @@ public class TestCommand {
     pb.inheritIO();
     Process process = pb.start();
     int exitCode = process.waitFor();
-
-    if (exitCode == 0) {
-      System.out.println("✅ Tests exitosos");
-    } else {
-      System.err.println("⚠️ Algunos tests fallaron");
-    }
   }
 
   private static String findJUnitConsoleJar(ProjectConfig config) {

@@ -12,15 +12,12 @@ public class RunJarCommand {
         return;
       }
 
-      // Buscar el primer archivo .jar en dist/
       Path jarFile = Files.list(distDir)
           .filter(p -> p.toString().endsWith(".jar"))
           .findFirst()
           .orElse(null);
 
       if (jarFile == null) {
-        // System.err.println("No se encontró ningún JAR en 'dist/'. Ejecuta 'jc new
-        // jar'.");
         return;
       }
 

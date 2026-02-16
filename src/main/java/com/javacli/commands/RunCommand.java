@@ -15,16 +15,6 @@ public class RunCommand {
         return;
       }
 
-      // Verificar si necesitamos recompilar (tu lógica actual)
-      if (needsRecompile()) {
-        System.out.println("Cambios detectados, recompilando...");
-        if (!BuildCommand.compileProject()) {
-          return;
-        }
-      } else {
-        System.out.println("Usando compilación existente...");
-      }
-
       System.out.println("Ejecutando proyecto...");
       runProject();
 
@@ -50,7 +40,6 @@ public class RunCommand {
           }
         });
   }
-  // Dentro de RunCommand.java
 
   private static void runProject() {
     try {

@@ -7,12 +7,10 @@ import java.nio.file.Paths;
 
 public class NewCommand {
 
-  // Versión original: usa el directorio de trabajo actual
   public static void execute() {
     execute(Paths.get(System.getProperty("user.dir")));
   }
 
-  // Nueva versión: permite especificar el directorio base (ideal para tests)
   public static void execute(Path baseDir) {
     try {
       String projectName = baseDir.getFileName().toString();
@@ -27,7 +25,7 @@ public class NewCommand {
 
   private static void createProjectStructure(Path baseDir) throws IOException {
     Files.createDirectories(baseDir.resolve("src/main/java"));
-    Files.createDirectories(baseDir.resolve("src/test/java")); // ← ahora se crea siempre
+    Files.createDirectories(baseDir.resolve("src/test/java"));
     Files.createDirectories(baseDir.resolve("lib"));
   }
 
@@ -44,7 +42,6 @@ public class NewCommand {
     generateClasspath(baseDir, projectName);
     generateProject(baseDir, projectName);
   }
-  // Dentro de NewCommand.java, después de createMainJavaFile
 
   private static void generateJcJson(Path baseDir, String projectName) throws IOException {
     String jsonContent = """
