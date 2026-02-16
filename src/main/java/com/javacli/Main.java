@@ -32,9 +32,8 @@ public class Main {
       case "build":
         if (args.length > 1 && args[1].equals("test")) {
           if (BuildCommand.compileTestProject()) {
-            System.out.println("✅ Tests compilados exitosamente");
           } else {
-            System.err.println("❌ Falló la compilación de tests");
+            System.err.println("Falló la compilación de tests");
           }
         } else {
           BuildCommand.execute();
@@ -60,7 +59,7 @@ public class Main {
         break;
 
       default:
-        System.out.println("❌ Comando no reconocido: " + command);
+        System.out.println("Comando no reconocido: " + command);
         printUsage();
     }
   }

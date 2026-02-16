@@ -2,7 +2,6 @@ package com.javacli.commands;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 
 public class CleanCommand {
   public static void execute() {

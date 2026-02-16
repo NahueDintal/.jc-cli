@@ -1,11 +1,7 @@
 package com.javacli.commands;
 
 import com.javacli.config.ProjectConfig;
-import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RunCommand {
   public static void execute() {
@@ -23,23 +19,24 @@ public class RunCommand {
     }
   }
 
-  private static boolean needsRecompile() throws IOException {
-    File binDir = new File("bin");
-    if (!binDir.exists() || !new File("bin/Main.class").exists()) {
-      return true;
-    }
-
-    FileTime lastCompiled = Files.getLastModifiedTime(Paths.get("bin/Main.class"));
-    return Files.walk(Paths.get("src"))
-        .filter(path -> path.toString().endsWith(".java"))
-        .anyMatch(javaFile -> {
-          try {
-            return Files.getLastModifiedTime(javaFile).compareTo(lastCompiled) > 0;
-          } catch (IOException e) {
-            return true;
-          }
-        });
-  }
+  // private static boolean needsRecompile() throws IOException {
+  // File binDir = new File("bin");
+  // if (!binDir.exists() || !new File("bin/Main.class").exists()) {
+  // return true;
+  // }
+  //
+  // FileTime lastCompiled =
+  // Files.getLastModifiedTime(Paths.get("bin/Main.class"));
+  // return Files.walk(Paths.get("src"))
+  // .filter(path -> path.toString().endsWith(".java"))
+  // .anyMatch(javaFile -> {
+  // try {
+  // return Files.getLastModifiedTime(javaFile).compareTo(lastCompiled) > 0;
+  // } catch (IOException e) {
+  // return true;
+  // }
+  // });
+  // }
 
   private static void runProject() {
     try {
