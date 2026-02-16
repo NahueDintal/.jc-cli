@@ -1,1 +1,2 @@
-1|tengo un problema con la función main, tengo que decirle al jc que compile main en otro lugar!|13/02/2026|Sin descripción|Sin tipo|media
+1|tengo un problema con la función main, tengo que decirle al jc que compile main en otro lugar!|13/02/2026|Sin descripción|Sin tipo|media|completada
+2|simplificar estructura de carpetas|15/02/2026|Sin descripción|Sin tipo|media|completada
