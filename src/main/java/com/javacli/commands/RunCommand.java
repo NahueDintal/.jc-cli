@@ -18,7 +18,6 @@ public class RunCommand {
         }
       }
 
-      System.out.println("Ejecutando proyecto...");
       runProject();
 
     } catch (Exception e) {
@@ -29,21 +28,15 @@ public class RunCommand {
   private static boolean needsRecompile() throws IOException {
     ProjectConfig config = ProjectConfig.load(Paths.get(""));
     String mainClass = config.getMainClass();
-    // Convertir el nombre de la clase a ruta de archivo (ej: "com.javacli.Main" ->
-    // "com/javacli/Main.class")
     String classFileName = mainClass.replace('.', '/') + ".class";
     Path mainClassPath = Paths.get("bin", classFileName);
 
-    // Si no existe el archivo .class principal, hay que recompilar
     if (!Files.exists(mainClassPath)) {
       return true;
     }
 
     FileTime lastCompiled = Files.getLastModifiedTime(mainClassPath);
 
-    // Buscar todos los archivos .java en los directorios fuente
-    // (config.sourceDirectories)
-    // En lugar de asumir "src", usamos las rutas configuradas para mayor precisión.
     for (String srcDir : config.getSourceDirectories()) {
       Path srcPath = Paths.get(srcDir);
       if (Files.exists(srcPath)) {
@@ -53,7 +46,7 @@ public class RunCommand {
               try {
                 return Files.getLastModifiedTime(javaFile).compareTo(lastCompiled) > 0;
               } catch (IOException e) {
-                return true; // si hay error, asumimos que cambió
+                return true;
               }
             });
         if (anyNewer) {
@@ -61,8 +54,6 @@ public class RunCommand {
         }
       }
     }
-
-    // Si llegamos acá, ningún fuente es más nuevo que la última compilación
     return false;
   }
 

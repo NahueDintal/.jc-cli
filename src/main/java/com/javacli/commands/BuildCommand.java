@@ -38,7 +38,9 @@ public class BuildCommand {
               .forEach(javaFiles::add);
         }
       }
-      System.out.println("Archivos Java encontrados: " + javaFiles.size());
+
+      System.out.println("Construyendo proyecto...");
+      // System.out.println("Archivos Java encontrados: " + javaFiles.size());
       if (javaFiles.isEmpty()) {
         System.err.println("No se encontraron archivos .java en " + config.getSourceDirectories());
         return false;
@@ -53,8 +55,7 @@ public class BuildCommand {
       compileCommand.add("-d");
       compileCommand.add("bin");
 
-      // Usar el buildClasspath que recibe config (deberías tenerlo público)
-      String cp = BuildCommand.buildClasspath(config); // Asegúrate de que este método existe y es público
+      String cp = BuildCommand.buildClasspath(config);
       if (!cp.isEmpty()) {
         compileCommand.add("-cp");
         compileCommand.add(cp);
@@ -64,12 +65,12 @@ public class BuildCommand {
         compileCommand.add(javaFile.toString());
       }
 
-      System.out.println("Ejecutando: " + String.join(" ", compileCommand));
+      // System.out.println("Ejecutando: " + String.join(" ", compileCommand));
       ProcessBuilder pb = new ProcessBuilder(compileCommand);
       pb.inheritIO();
       Process process = pb.start();
       int exitCode = process.waitFor();
-      System.out.println("Código de salida de javac: " + exitCode);
+      // System.out.println("Código de salida de javac: " + exitCode);
       return exitCode == 0;
 
     } catch (Exception e) {
@@ -80,11 +81,10 @@ public class BuildCommand {
 
   public static String buildClasspath(ProjectConfig config) {
     List<String> cpEntries = new ArrayList<>();
-    // Añadir el directorio de salida si existe (para clases compiladas)
     if (Files.exists(Paths.get("bin"))) {
       cpEntries.add("bin");
     }
-    // Añadir dependencias (rutas de JARs)
+
     for (String dep : config.getDependencies()) {
       Path depPath = Paths.get(dep);
       if (Files.exists(depPath)) {
@@ -93,6 +93,7 @@ public class BuildCommand {
         System.err.println("Advertencia: dependencia no encontrada: " + dep);
       }
     }
+
     return String.join(File.pathSeparator, cpEntries);
   }
 
