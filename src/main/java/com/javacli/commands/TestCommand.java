@@ -45,7 +45,7 @@ public class TestCommand {
     List<String> compileCommand = new ArrayList<>();
     compileCommand.add("javac");
     compileCommand.add("--release");
-    compileCommand.add("25");
+    compileCommand.add(String.valueOf(config.getJavaVersion()));
     compileCommand.add("-d");
     compileCommand.add("bin-test");
     compileCommand.add("-cp");

@@ -51,7 +51,7 @@ public class BuildCommand {
       List<String> compileCommand = new ArrayList<>();
       compileCommand.add("javac");
       compileCommand.add("--release");
-      compileCommand.add("25");
+      compileCommand.add(String.valueOf(config.getJavaVersion())); // antes era "25"
       compileCommand.add("-d");
       compileCommand.add("bin");
 

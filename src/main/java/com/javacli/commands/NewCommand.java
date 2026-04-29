@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 
 public class NewCommand {
 
+  private static final int DEFAULT_JAVA_VERSION = 25;
+
   public static void execute() {
     execute(Paths.get(System.getProperty("user.dir")));
   }
@@ -43,7 +45,7 @@ public class NewCommand {
     generateProject(baseDir, projectName);
   }
 
-  private static void generateJcJson(Path baseDir, String projectName) throws IOException {
+  private static void generateJcJson(Path baseDir, String projectName, int javaVersion) throws IOException {
     String jsonContent = """
         {
           "name": "%s",
@@ -51,9 +53,10 @@ public class NewCommand {
           "mainClass": "Main",
           "sourceDirectories": ["src/main/java"],
           "testDirectories": ["src/test/java"],
-          "dependencies": []
+          "dependencies": [],
+          "javaVersion": %d
         }
-        """.formatted(projectName);
+        """.formatted(projectName, javaVersion);
     Files.writeString(baseDir.resolve("jc.json"), jsonContent);
   }
 
@@ -89,5 +92,21 @@ public class NewCommand {
         </projectDescription>
         """.formatted(projectName);
     Files.writeString(baseDir.resolve(".project"), projectContent);
+  }
+
+  public static void execute(int javaVersion) {
+    execute(Paths.get(System.getProperty("user.dir")), javaVersion);
+  }
+
+  private static void execute(Path baseDir, int javaVersion) {
+    try {
+      String projectName = baseDir.getFileName().toString();
+      createProjectStructure(baseDir);
+      createMainJavaFile(baseDir, projectName, javaVersion);
+      System.out.println("Proyecto Java " + javaVersion + " creado exitosamente en: " + baseDir);
+      System.out.println("   Usa: 'jc run' para compilar y ejecutar");
+    } catch (Exception e) {
+      System.err.println("Error al crear proyecto: " + e.getMessage());
+    }
   }
 }
