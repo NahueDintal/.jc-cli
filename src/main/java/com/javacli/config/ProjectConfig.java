@@ -17,6 +17,7 @@ public class ProjectConfig {
   private List<String> dependencies;
   private String testFramework;
   private int javaVersion = 25; // es el default
+  private String outputDirectory = "out/production/default"; // valor por defecto
 
   public static ProjectConfig load(Path baseDir) throws IOException {
     Path configPath = baseDir.resolve("jc.json");
@@ -34,6 +35,7 @@ public class ProjectConfig {
     config.dependencies = extractList(content, "dependencies");
     config.testFramework = extractString(content, "testFramework");
     config.javaVersion = extractInt(content, "javaVersion", 25);
+    config.outputDirectory = extractString(content, "outputDirectory");
 
     return config;
   }
@@ -109,6 +111,10 @@ public class ProjectConfig {
 
   public int getJavaVersion() {
     return javaVersion;
+  }
+
+  public String getOutputDirectory() {
+    return outputDirectory;
   }
 
   public void generateClasspath(Path baseDir) throws IOException {

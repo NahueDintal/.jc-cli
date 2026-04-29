@@ -9,109 +9,68 @@ public class NewCommand {
 
   private static final int DEFAULT_JAVA_VERSION = 25;
 
+  // Sin argumentos → versión por defecto
   public static void execute() {
-    execute(Paths.get(System.getProperty("user.dir")));
+    execute(DEFAULT_JAVA_VERSION);
   }
 
-  public static void execute(Path baseDir) {
+  // Con versión explícita
+  public static void execute(int javaVersion) {
+    execute(Paths.get(System.getProperty("user.dir")), javaVersion);
+  }
+
+  // Lógica real
+  private static void execute(Path baseDir, int javaVersion) {
     try {
       String projectName = baseDir.getFileName().toString();
-      createProjectStructure(baseDir);
-      createMainJavaFile(baseDir, projectName);
-      System.out.println("Proyecto Java 25 creado exitosamente en: " + baseDir);
-      System.out.println("   Usa: 'jc run' para compilar y ejecutar");
+      createProjectStructure(baseDir, projectName);
+      createMainJavaFile(baseDir, projectName, javaVersion);
+      System.out.println("Proyecto Java " + javaVersion + " (estilo IntelliJ) creado en: " + baseDir);
+      System.out.println("   Abrí la carpeta con IntelliJ o usá 'jc run'");
     } catch (Exception e) {
       System.err.println("Error al crear proyecto: " + e.getMessage());
     }
   }
 
-  private static void createProjectStructure(Path baseDir) throws IOException {
-    Files.createDirectories(baseDir.resolve("src/main/java"));
-    Files.createDirectories(baseDir.resolve("src/test/java"));
-    Files.createDirectories(baseDir.resolve("lib"));
+  private static void createProjectStructure(Path baseDir, String projectName) throws IOException {
+    Files.createDirectories(baseDir.resolve("src")); // fuente directo
+    Files.createDirectories(baseDir.resolve("lib")); // dependencias
+    // out/production/<projectName> se crea al compilar
   }
 
   private static void createMainJavaFile(Path baseDir, String projectName, int javaVersion) throws IOException {
     String mainJavaContent = """
         public class Main {
             public static void main(String[] args) {
-                System.out.println("¡Hola Wachin! ¡Desde el directorio '%s' con Java %d!");
+                System.out.println("¡Hola Wachin! Desde '%s' con Java %d!");
             }
         }
         """.formatted(projectName, javaVersion);
-    Files.writeString(baseDir.resolve("src/main/java/Main.java"), mainJavaContent);
+    Files.writeString(baseDir.resolve("src/Main.java"), mainJavaContent);
 
     generateJcJson(baseDir, projectName, javaVersion);
     generateIntelliJFiles(baseDir, projectName, javaVersion);
+    generateGitignore(baseDir);
   }
 
   private static void generateJcJson(Path baseDir, String projectName, int javaVersion) throws IOException {
+    String outputDir = "out/production/" + projectName;
     String jsonContent = """
         {
           "name": "%s",
           "version": "1.0.0",
           "mainClass": "Main",
-          "sourceDirectories": ["src/main/java"],
-          "testDirectories": ["src/test/java"],
+          "sourceDirectories": ["src"],
+          "testDirectories": [],
           "dependencies": [],
+          "outputDirectory": "%s",
           "javaVersion": %d
         }
-        """.formatted(projectName, javaVersion);
+        """.formatted(projectName, outputDir, javaVersion);
     Files.writeString(baseDir.resolve("jc.json"), jsonContent);
   }
 
-  private static void generateClasspath(Path baseDir, String projectName) throws IOException {
-    // Por ahora, como no hay dependencias, generamos un .classpath básico
-    String classpathContent = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <classpath>
-            <classpathentry kind="src" path="src/main/java"/>
-            <classpathentry kind="src" path="src/test/java"/>
-            <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-            <classpathentry kind="output" path="bin"/>
-        </classpath>
-        """;
-    Files.writeString(baseDir.resolve(".classpath"), classpathContent);
-  }
-
-  private static void generateProject(Path baseDir, String projectName) throws IOException {
-    String projectContent = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <projectDescription>
-            <name>%s</name>
-            <comment></comment>
-            <projects></projects>
-            <buildSpec>
-                <buildCommand>
-                    <name>org.eclipse.jdt.core.javabuilder</name>
-                </buildCommand>
-            </buildSpec>
-            <natures>
-                <nature>org.eclipse.jdt.core.javanature</nature>
-            </natures>
-        </projectDescription>
-        """.formatted(projectName);
-    Files.writeString(baseDir.resolve(".project"), projectContent);
-  }
-
-  public static void execute(int javaVersion) {
-    execute(Paths.get(System.getProperty("user.dir")), javaVersion);
-  }
-
-  private static void execute(Path baseDir, int javaVersion) {
-    try {
-      String projectName = baseDir.getFileName().toString();
-      createProjectStructure(baseDir);
-      createMainJavaFile(baseDir, projectName, javaVersion);
-      System.out.println("Proyecto Java " + javaVersion + " creado exitosamente en: " + baseDir);
-      System.out.println("   Usa: 'jc run' para compilar y ejecutar");
-    } catch (Exception e) {
-      System.err.println("Error al crear proyecto: " + e.getMessage());
-    }
-  }
-
   private static void generateIntelliJFiles(Path baseDir, String projectName, int javaVersion) throws IOException {
-    // Crear carpeta .idea
     Path ideaDir = baseDir.resolve(".idea");
     Files.createDirectories(ideaDir);
 
@@ -128,35 +87,44 @@ public class NewCommand {
         """.formatted(projectName, projectName);
     Files.writeString(ideaDir.resolve("modules.xml"), modulesXml);
 
-    // .iml (IntelliJ Module)
+    // .iml
     String imlContent = """
         <?xml version="1.0" encoding="UTF-8"?>
         <module type="JAVA_MODULE" version="4">
           <component name="NewModuleRootManager" inherit-compiler-output="false">
-            <output url="file://$MODULE_DIR$/bin" />
-            <output-test url="file://$MODULE_DIR$/bin-test" />
+            <output url="file://$MODULE_DIR$/out/production/%s" />
+            <output-test url="file://$MODULE_DIR$/out/test/%s" />
             <exclude-output />
             <content url="file://$MODULE_DIR$">
-              <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-              <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+              <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
             </content>
             <orderEntry type="inheritedJdk" />
             <orderEntry type="sourceFolder" forTests="false" />
           </component>
         </module>
-        """;
+        """.formatted(projectName, projectName);
     Files.writeString(baseDir.resolve(projectName + ".iml"), imlContent);
 
-    // misc.xml (versión de Java)
+    // misc.xml (JDK version)
     String miscXml = """
         <?xml version="1.0" encoding="UTF-8"?>
         <project version="4">
           <component name="ProjectRootManager" version="2" languageLevel="JDK_%d" project-jdk-name="%d" project-jdk-type="JavaSDK">
-            <output url="file://$PROJECT_DIR$/bin" />
+            <output url="file://$PROJECT_DIR$/out/production/%s" />
           </component>
         </project>
         """
-        .formatted(javaVersion, javaVersion);
+        .formatted(javaVersion, javaVersion, projectName);
     Files.writeString(ideaDir.resolve("misc.xml"), miscXml);
+  }
+
+  private static void generateGitignore(Path baseDir) throws IOException {
+    String gitignore = """
+        out/
+        .idea/
+        *.iml
+        dist/
+        """;
+    Files.writeString(baseDir.resolve(".gitignore"), gitignore);
   }
 }

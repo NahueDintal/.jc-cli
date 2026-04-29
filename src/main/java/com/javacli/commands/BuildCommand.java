@@ -114,7 +114,7 @@ public class BuildCommand {
         return false;
       }
 
-      Files.createDirectories(Paths.get("bin-test"));
+      Files.createDirectories(Paths.get(config.getOutputDirectory()))
 
       String cp = "bin" + File.pathSeparator + buildClasspath();
       if (cp.trim().isEmpty()) {
