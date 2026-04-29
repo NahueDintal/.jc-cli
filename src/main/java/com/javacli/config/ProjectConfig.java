@@ -16,6 +16,7 @@ public class ProjectConfig {
   private List<String> testDirectories;
   private List<String> dependencies;
   private String testFramework;
+  private int javaVersion = 25; // es el default
 
   public static ProjectConfig load(Path baseDir) throws IOException {
     Path configPath = baseDir.resolve("jc.json");
@@ -32,8 +33,18 @@ public class ProjectConfig {
     config.testDirectories = extractList(content, "testDirectories");
     config.dependencies = extractList(content, "dependencies");
     config.testFramework = extractString(content, "testFramework");
+    config.javaVersion = extractInt(content, "javaVersion", 25);
 
     return config;
+  }
+
+  private static int extractInt(String json, String key, int defaultValue) {
+    Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
+    Matcher matcher = pattern.matcher(json);
+    if (matcher.find()) {
+      return Integer.parseInt(matcher.group(1));
+    }
+    return defaultValue;
   }
 
   private static String extractString(String json, String key) {
@@ -94,6 +105,10 @@ public class ProjectConfig {
 
   public String getTestFramework() {
     return testFramework;
+  }
+
+  public int getJavaVersion() {
+    return javaVersion;
   }
 
   public void generateClasspath(Path baseDir) throws IOException {

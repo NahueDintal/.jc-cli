@@ -15,9 +15,12 @@ public class Main {
     switch (command) {
       case "new":
         if (args.length > 1 && args[1].equals("jar")) {
-          NewJarCommand.execute();
+          NewJarCommand.execute(); // para crear el jar
+        } else if (args.length > 1 && args[1].matches("\\d+")) {
+          int version = Integer.parseInt(args[1]);
+          NewCommand.execute(version); // para la version 17
         } else {
-          NewCommand.execute();
+          NewCommand.execute(); // default java 25
         }
         break;
 
@@ -68,6 +71,7 @@ public class Main {
     System.out.println("Uso: jc <comando>");
     System.out.println("Comandos:");
     System.out.println("  new               - Crear nuevo proyecto Java.");
+    System.out.println("  new [version]     - Crear nuevo proyecto Java (default 25).");
     System.out.println("  new jar           - Empaquetar proyecto en JAR ejecutable.");
     System.out.println("  build             - Compilar código en src/main/java.");
     System.out.println("  build test        - Compilar tests en src/test/java.");
