@@ -31,18 +31,18 @@ public class NewCommand {
     Files.createDirectories(baseDir.resolve("lib"));
   }
 
-  private static void createMainJavaFile(Path baseDir, String projectName) throws IOException {
+  private static void createMainJavaFile(Path baseDir, String projectName, int javaVersion) throws IOException {
     String mainJavaContent = """
         public class Main {
             public static void main(String[] args) {
-                System.out.println("¡Hola Wachin! ¡Desde el directorio '%s' con Java 25!");
+                System.out.println("¡Hola Wachin! ¡Desde el directorio '%s' con Java %d!");
             }
         }
-        """.formatted(projectName);
+        """.formatted(projectName, javaVersion);
     Files.writeString(baseDir.resolve("src/main/java/Main.java"), mainJavaContent);
-    generateJcJson(baseDir, projectName);
-    generateClasspath(baseDir, projectName);
-    generateProject(baseDir, projectName);
+
+    generateJcJson(baseDir, projectName, javaVersion);
+    generateIntelliJFiles(baseDir, projectName, javaVersion);
   }
 
   private static void generateJcJson(Path baseDir, String projectName, int javaVersion) throws IOException {
@@ -108,5 +108,55 @@ public class NewCommand {
     } catch (Exception e) {
       System.err.println("Error al crear proyecto: " + e.getMessage());
     }
+  }
+
+  private static void generateIntelliJFiles(Path baseDir, String projectName, int javaVersion) throws IOException {
+    // Crear carpeta .idea
+    Path ideaDir = baseDir.resolve(".idea");
+    Files.createDirectories(ideaDir);
+
+    // modules.xml
+    String modulesXml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project version="4">
+          <component name="ProjectModuleManager">
+            <modules>
+              <module fileurl="file://$PROJECT_DIR$/%s.iml" filepath="$PROJECT_DIR$/%s.iml" />
+            </modules>
+          </component>
+        </project>
+        """.formatted(projectName, projectName);
+    Files.writeString(ideaDir.resolve("modules.xml"), modulesXml);
+
+    // .iml (IntelliJ Module)
+    String imlContent = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <module type="JAVA_MODULE" version="4">
+          <component name="NewModuleRootManager" inherit-compiler-output="false">
+            <output url="file://$MODULE_DIR$/bin" />
+            <output-test url="file://$MODULE_DIR$/bin-test" />
+            <exclude-output />
+            <content url="file://$MODULE_DIR$">
+              <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+              <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+            </content>
+            <orderEntry type="inheritedJdk" />
+            <orderEntry type="sourceFolder" forTests="false" />
+          </component>
+        </module>
+        """;
+    Files.writeString(baseDir.resolve(projectName + ".iml"), imlContent);
+
+    // misc.xml (versión de Java)
+    String miscXml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project version="4">
+          <component name="ProjectRootManager" version="2" languageLevel="JDK_%d" project-jdk-name="%d" project-jdk-type="JavaSDK">
+            <output url="file://$PROJECT_DIR$/bin" />
+          </component>
+        </project>
+        """
+        .formatted(javaVersion, javaVersion);
+    Files.writeString(ideaDir.resolve("misc.xml"), miscXml);
   }
 }
