@@ -6,30 +6,33 @@ import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 
 public class RunCommand {
+
   public static void execute() {
     try {
-      if (!Files.exists(Paths.get("src"))) {
-        System.err.println("No se encuentra el directorio 'src/'. Ejecuta 'jc new' primero.");
+      ProjectConfig config = ProjectConfig.load(Paths.get(""));
+      Path srcDir = Paths.get(config.getSourceDirectories().get(0));
+      if (!Files.exists(srcDir)) {
+        System.err.println("No se encuentra '" + srcDir + "'. Ejecuta 'jc new' primero.");
         return;
       }
-      if (needsRecompile()) {
-        if (!BuildCommand.compileProject()) {
+
+      if (needsRecompile(config)) {
+        if (!BuildCommand.compileProject(config)) {
           return;
         }
       }
 
-      runProject();
+      runProject(config);
 
     } catch (Exception e) {
       System.err.println("Error durante ejecución: " + e.getMessage());
     }
   }
 
-  private static boolean needsRecompile() throws IOException {
-    ProjectConfig config = ProjectConfig.load(Paths.get(""));
+  private static boolean needsRecompile(ProjectConfig config) throws IOException {
     String mainClass = config.getMainClass();
     String classFileName = mainClass.replace('.', '/') + ".class";
-    Path mainClassPath = Paths.get("bin", classFileName);
+    Path mainClassPath = Paths.get(config.getOutputDirectory(), classFileName);
 
     if (!Files.exists(mainClassPath)) {
       return true;
@@ -49,19 +52,18 @@ public class RunCommand {
                 return true;
               }
             });
-        if (anyNewer) {
+        if (anyNewer)
           return true;
-        }
       }
     }
     return false;
   }
 
-  private static void runProject() {
+  private static void runProject(ProjectConfig config) {
     try {
-      ProjectConfig config = ProjectConfig.load(Paths.get(""));
       String mainClass = config.getMainClass();
-      ProcessBuilder pb = new ProcessBuilder("java", "-cp", "bin", mainClass);
+      String cp = config.getOutputDirectory();
+      ProcessBuilder pb = new ProcessBuilder("java", "-cp", cp, mainClass);
       pb.inheritIO();
       Process process = pb.start();
       process.waitFor();

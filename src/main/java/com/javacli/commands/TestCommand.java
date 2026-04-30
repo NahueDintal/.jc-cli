@@ -14,9 +14,7 @@ public class TestCommand {
         System.err.println("Falló la compilación de tests");
         return;
       }
-
       runTests(config);
-
     } catch (Exception e) {
       System.err.println("Error ejecutando tests: " + e.getMessage());
     }
@@ -37,17 +35,17 @@ public class TestCommand {
       return false;
     }
 
-    Files.createDirectories(Paths.get("bin-test"));
+    String testOutputDir = config.getTestOutputDirectory();
+    Files.createDirectories(Paths.get(testOutputDir));
 
-    String cp = BuildCommand.buildClasspath(config);
-    cp = "bin" + File.pathSeparator + cp;
+    String cp = config.getOutputDirectory() + File.pathSeparator + BuildCommand.buildClasspath(config);
 
     List<String> compileCommand = new ArrayList<>();
     compileCommand.add("javac");
     compileCommand.add("--release");
     compileCommand.add(String.valueOf(config.getJavaVersion()));
     compileCommand.add("-d");
-    compileCommand.add("bin-test");
+    compileCommand.add(testOutputDir);
     compileCommand.add("-cp");
     compileCommand.add(cp);
     testFiles.forEach(f -> compileCommand.add(f.toString()));
@@ -68,11 +66,13 @@ public class TestCommand {
     String junitConsoleJar = findJUnitConsoleJar(config);
     if (junitConsoleJar == null) {
       System.err.println(
-          "No se encontró JUnit Platform Console en las dependencias. Agregá el JAR a jc.json y colocá el archivo en la ruta correspondiente.");
+          "No se encontró JUnit Platform Console. Agregá el JAR y la ruta en jc.json (dependencies).");
       return;
     }
 
-    String cp = "bin-test" + File.pathSeparator + "bin" + File.pathSeparator + BuildCommand.buildClasspath(config);
+    String cp = config.getTestOutputDirectory() + File.pathSeparator
+        + config.getOutputDirectory() + File.pathSeparator
+        + BuildCommand.buildClasspath(config);
 
     List<String> cmd = List.of(
         "java", "-cp", cp,
