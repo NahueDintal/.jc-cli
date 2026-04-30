@@ -1,2 +1,3 @@
 1|tengo un problema con la función main, tengo que decirle al jc que compile main en otro lugar!|13/02/2026|Sin descripción|Sin tipo|media|completada
 2|simplificar estructura de carpetas|15/02/2026|Sin descripción|Sin tipo|media|completada
+3|Cambiar a java 17 como proyecto nuevo, o que deje elegir cual versión|24/04/2026|Sin descripción|Sin tipo|media
