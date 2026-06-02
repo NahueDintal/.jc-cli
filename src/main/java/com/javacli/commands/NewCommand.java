@@ -26,30 +26,30 @@ public class NewCommand {
       createProjectStructure(baseDir, projectName);
       createMainJavaFile(baseDir, projectName, javaVersion);
       System.out.println("Proyecto Java " + javaVersion + " (estilo IntelliJ) creado en: " + baseDir);
-      System.out.println("   Abrí la carpeta con IntelliJ o usá 'jc run'");
+      System.out.println("  Abrí la carpeta con IntelliJ o usá 'jc run'");
     } catch (Exception e) {
       System.err.println("Error al crear proyecto: " + e.getMessage());
     }
   }
 
   private static void createProjectStructure(Path baseDir, String projectName) throws IOException {
-    Files.createDirectories(baseDir.resolve("src")); // fuente directo
-    Files.createDirectories(baseDir.resolve("lib")); // dependencias
-    // out/production/<projectName> se crea al compilar
+    Files.createDirectories(baseDir.resolve("src"));
+    Files.createDirectories(baseDir.resolve("lib"));
   }
 
   private static void createMainJavaFile(Path baseDir, String projectName, int javaVersion) throws IOException {
     String mainJavaContent = """
         public class Main {
-            public static void main(String[] args) {
-                System.out.println("¡Hola Wachin! Desde '%s' con Java %d!");
-            }
+          public static void main(String[] args) {
+              System.out.println("¡Hola Wachin! Desde '%s' con Java %d!");
+          }
         }
-        """.formatted(projectName, javaVersion);
+          """.formatted(projectName, javaVersion);
     Files.writeString(baseDir.resolve("src/Main.java"), mainJavaContent);
 
     generateJcJson(baseDir, projectName, javaVersion);
     generateIntelliJFiles(baseDir, projectName, javaVersion);
+    generateEclipseFiles(baseDir, projectName, javaVersion);
     generateGitignore(baseDir);
   }
 
@@ -74,7 +74,6 @@ public class NewCommand {
     Path ideaDir = baseDir.resolve(".idea");
     Files.createDirectories(ideaDir);
 
-    // modules.xml
     String modulesXml = """
         <?xml version="1.0" encoding="UTF-8"?>
         <project version="4">
@@ -87,7 +86,6 @@ public class NewCommand {
         """.formatted(projectName, projectName);
     Files.writeString(ideaDir.resolve("modules.xml"), modulesXml);
 
-    // .iml
     String imlContent = """
         <?xml version="1.0" encoding="UTF-8"?>
         <module type="JAVA_MODULE" version="4">
@@ -105,7 +103,6 @@ public class NewCommand {
         """.formatted(projectName, projectName);
     Files.writeString(baseDir.resolve(projectName + ".iml"), imlContent);
 
-    // misc.xml (JDK version)
     String miscXml = """
         <?xml version="1.0" encoding="UTF-8"?>
         <project version="4">
@@ -126,5 +123,37 @@ public class NewCommand {
         dist/
         """;
     Files.writeString(baseDir.resolve(".gitignore"), gitignore);
+  }
+
+  private static void generateEclipseFiles(Path baseDir, String projectName, int javaVersion) throws IOException {
+    String projectXml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <projectDescription>
+            <name>%s</name>
+            <comment>Proyecto Java %d generado por jc</comment>
+            <projects></projects>
+            <buildSpec>
+                <buildCommand>
+                    <name>org.eclipse.jdt.core.javabuilder</name>
+                </buildCommand>
+            </buildSpec>
+            <natures>
+                <nature>org.eclipse.jdt.core.javanature</nature>
+            </natures>
+        </projectDescription>
+        """.formatted(projectName, javaVersion);
+    Files.writeString(baseDir.resolve(".project"), projectXml);
+
+    String outputDir = "out/production/" + projectName;
+    String classpathXml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <classpath>
+            <classpathentry kind="src" path="src"/>
+            <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+            <classpathentry kind="lib" path="lib" including="**/*.jar"/>
+            <classpathentry kind="output" path="%s"/>
+        </classpath>
+        """.formatted(outputDir);
+    Files.writeString(baseDir.resolve(".classpath"), classpathXml);
   }
 }
