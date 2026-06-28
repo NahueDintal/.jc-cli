@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class NewCommand {
 
-  private static final int DEFAULT_JAVA_VERSION = 25;
+  private static final int DEFAULT_JAVA_VERSION = 17;
 
   // Sin argumentos → versión por defecto
   public static void execute() {

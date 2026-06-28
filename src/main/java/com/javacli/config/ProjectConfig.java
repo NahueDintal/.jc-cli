@@ -16,7 +16,7 @@ public class ProjectConfig {
   private List<String> testDirectories;
   private List<String> dependencies;
   private String testFramework;
-  private int javaVersion = 25;
+  private int javaVersion = 17;
   private String outputDirectory = "out/production/default";
   private String testOutputDirectory = "out/test/default"; // valor por defecto
 
