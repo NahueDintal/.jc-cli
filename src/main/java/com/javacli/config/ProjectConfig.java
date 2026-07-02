@@ -18,7 +18,11 @@ public class ProjectConfig {
   private String testFramework;
   private int javaVersion = 17;
   private String outputDirectory = "out/production/default";
-  private String testOutputDirectory = "out/test/default"; // valor por defecto
+  private String testOutputDirectory = "out/test/default";
+
+  // Nuevos campos para JavaFX
+  private String javafxModulePath;
+  private List<String> javafxModules;
 
   public static ProjectConfig load(Path baseDir) throws IOException {
     Path configPath = baseDir.resolve("jc.json");
@@ -35,9 +39,18 @@ public class ProjectConfig {
     config.testDirectories = extractList(content, "testDirectories");
     config.dependencies = extractList(content, "dependencies");
     config.testFramework = extractString(content, "testFramework");
-    config.javaVersion = extractInt(content, "javaVersion", 25);
+    config.javaVersion = extractInt(content, "javaVersion", 17);
     config.outputDirectory = extractString(content, "outputDirectory");
     config.testOutputDirectory = extractString(content, "testOutputDirectory");
+
+    // Parsear JavaFX
+    config.javafxModulePath = extractString(content, "javafxModulePath");
+    config.javafxModules = extractList(content, "javafxModules");
+    // Si hay modulePath pero no modules, usar defaults
+    if (config.javafxModulePath != null && !config.javafxModulePath.isEmpty()
+        && (config.javafxModules == null || config.javafxModules.isEmpty())) {
+      config.javafxModules = List.of("javafx.controls", "javafx.fxml");
+    }
 
     return config;
   }
@@ -82,7 +95,7 @@ public class ProjectConfig {
     return list;
   }
 
-  // Getters
+  // Getters existentes
   public String getName() {
     return name;
   }
@@ -123,27 +136,32 @@ public class ProjectConfig {
     return testOutputDirectory;
   }
 
+  // Nuevos getters para JavaFX
+  public String getJavafxModulePath() {
+    return javafxModulePath;
+  }
+
+  public List<String> getJavafxModules() {
+    return javafxModules;
+  }
+
+  // Método para generar .classpath (no modificado, pero se mantiene)
   public void generateClasspath(Path baseDir) throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     sb.append("<classpath>\n");
-
     for (String src : sourceDirectories) {
       sb.append("    <classpathentry kind=\"src\" path=\"").append(src).append("\"/>\n");
     }
     for (String testSrc : testDirectories) {
       sb.append("    <classpathentry kind=\"src\" path=\"").append(testSrc).append("\"/>\n");
     }
-
     sb.append("    <classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-
     for (String dep : dependencies) {
       sb.append("    <classpathentry kind=\"lib\" path=\"").append(dep).append("\"/>\n");
     }
-
     sb.append("    <classpathentry kind=\"output\" path=\"bin\"/>\n");
     sb.append("</classpath>\n");
-
     Files.writeString(baseDir.resolve(".classpath"), sb.toString());
   }
 }

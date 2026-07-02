@@ -4,6 +4,8 @@ import com.javacli.config.ProjectConfig;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RunCommand {
 
@@ -63,7 +65,25 @@ public class RunCommand {
     try {
       String mainClass = config.getMainClass();
       String cp = config.getOutputDirectory();
-      ProcessBuilder pb = new ProcessBuilder("java", "-cp", cp, mainClass);
+
+      List<String> cmd = new ArrayList<>();
+      cmd.add("java");
+
+      // Agregar opciones de JavaFX si están configuradas
+      String modulePath = config.getJavafxModulePath();
+      if (modulePath != null && !modulePath.isEmpty()) {
+        cmd.add("--module-path");
+        cmd.add(modulePath);
+        String modules = String.join(",", config.getJavafxModules());
+        cmd.add("--add-modules");
+        cmd.add(modules);
+      }
+
+      cmd.add("-cp");
+      cmd.add(cp);
+      cmd.add(mainClass);
+
+      ProcessBuilder pb = new ProcessBuilder(cmd);
       pb.inheritIO();
       Process process = pb.start();
       process.waitFor();

@@ -10,7 +10,7 @@ public class BuildCommand {
   public static void execute() {
     try {
       ProjectConfig config = ProjectConfig.load(Paths.get(""));
-      Path srcDir = Paths.get(config.getSourceDirectories().get(0)); // tomamos el primer source
+      Path srcDir = Paths.get(config.getSourceDirectories().get(0));
       if (!Files.exists(srcDir)) {
         System.err.println("No se encuentra '" + srcDir + "'. Ejecutá 'jc new' primero.");
         return;
@@ -26,7 +26,6 @@ public class BuildCommand {
     }
   }
 
-  // Usa el config cargado (ya se pasa desde execute o se puede cargar de nuevo)
   public static boolean compileProject(ProjectConfig config) {
     try {
       List<Path> javaFiles = new ArrayList<>();
@@ -61,6 +60,16 @@ public class BuildCommand {
         compileCommand.add(cp);
       }
 
+      // --- AGREGAR SOPORTE JAVAFX ---
+      String modulePath = config.getJavafxModulePath();
+      if (modulePath != null && !modulePath.isEmpty()) {
+        compileCommand.add("--module-path");
+        compileCommand.add(modulePath);
+        String modules = String.join(",", config.getJavafxModules());
+        compileCommand.add("--add-modules");
+        compileCommand.add(modules);
+      }
+
       for (Path javaFile : javaFiles) {
         compileCommand.add(javaFile.toString());
       }
@@ -77,7 +86,6 @@ public class BuildCommand {
     }
   }
 
-  // Compilación de tests (llamado también desde TestCommand)
   public static boolean compileTestProject(ProjectConfig config) {
     try {
       List<Path> testFiles = new ArrayList<>();
@@ -98,7 +106,6 @@ public class BuildCommand {
       String testOutputDir = config.getTestOutputDirectory();
       Files.createDirectories(Paths.get(testOutputDir));
 
-      // Classpath: salida de producción + libs (y JUnit si está)
       String cp = config.getOutputDirectory() + File.pathSeparator + buildClasspath(config);
 
       List<String> compileCommand = new ArrayList<>();
@@ -109,6 +116,17 @@ public class BuildCommand {
       compileCommand.add(testOutputDir);
       compileCommand.add("-cp");
       compileCommand.add(cp);
+
+      // --- AGREGAR SOPORTE JAVAFX TAMBIÉN EN TESTS ---
+      String modulePath = config.getJavafxModulePath();
+      if (modulePath != null && !modulePath.isEmpty()) {
+        compileCommand.add("--module-path");
+        compileCommand.add(modulePath);
+        String modules = String.join(",", config.getJavafxModules());
+        compileCommand.add("--add-modules");
+        compileCommand.add(modules);
+      }
+
       testFiles.forEach(f -> compileCommand.add(f.toString()));
 
       ProcessBuilder pb = new ProcessBuilder(compileCommand);
@@ -122,18 +140,14 @@ public class BuildCommand {
     }
   }
 
-  // Classpath que incluye el directorio de salida de producción y las
-  // dependencias
   public static String buildClasspath(ProjectConfig config) {
     List<String> cpEntries = new ArrayList<>();
 
-    // directorio de compilados principal
     String outputDir = config.getOutputDirectory();
     if (Files.exists(Paths.get(outputDir))) {
       cpEntries.add(outputDir);
     }
 
-    // dependencias (JARs de lib/ y las listadas en jc.json)
     for (String dep : config.getDependencies()) {
       Path depPath = Paths.get(dep);
       if (Files.exists(depPath)) {
@@ -146,7 +160,6 @@ public class BuildCommand {
     return String.join(File.pathSeparator, cpEntries);
   }
 
-  // Compila el proyecto actual (carga automáticamente el config)
   public static boolean compileProject() {
     try {
       ProjectConfig config = ProjectConfig.load(Paths.get(""));
@@ -157,7 +170,6 @@ public class BuildCommand {
     }
   }
 
-  // Compila los tests del proyecto actual (carga automáticamente el config)
   public static boolean compileTestProject() {
     try {
       ProjectConfig config = ProjectConfig.load(Paths.get(""));
@@ -168,8 +180,6 @@ public class BuildCommand {
     }
   }
 
-  // Classpath solo con los JARs de lib/ (usado en compilación de tests si no se
-  // tiene config)
   public static String buildClasspath() {
     Path libDir = Paths.get("lib");
     if (!Files.exists(libDir))
