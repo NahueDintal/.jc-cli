@@ -64,12 +64,11 @@ public class RunCommand {
   private static void runProject(ProjectConfig config) {
     try {
       String mainClass = config.getMainClass();
-      String cp = config.getOutputDirectory();
+      String cp = BuildCommand.buildClasspath(config);
 
       List<String> cmd = new ArrayList<>();
       cmd.add("java");
 
-      // Agregar opciones de JavaFX si están configuradas
       String modulePath = config.getJavafxModulePath();
       if (modulePath != null && !modulePath.isEmpty()) {
         cmd.add("--module-path");
